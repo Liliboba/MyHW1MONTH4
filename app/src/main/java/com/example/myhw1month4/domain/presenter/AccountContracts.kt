@@ -10,5 +10,6 @@ interface AccountContracts {
 
     interface Presenter {
         fun loadAccunts()
+        fun createAccount(account: Account)
     }
 }

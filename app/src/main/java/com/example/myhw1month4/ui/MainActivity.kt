@@ -1,7 +1,9 @@
 package com.example.myhw1month4.ui
 
 import android.os.Bundle
+import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,6 +29,10 @@ class MainActivity : AppCompatActivity(), AccountContracts.View {
         presenter = AccountPresenter(this)
 
         initAdapter()
+
+        binding.btnAdd.setOnClickListener {
+            showAddDialog()
+        }
     }
 
     private fun initAdapter(){
@@ -44,5 +50,32 @@ class MainActivity : AppCompatActivity(), AccountContracts.View {
 
     override fun showAccounts(list: List<Account>) {
         adapter.submitList(list)
+    }
+
+    private fun showAddDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_account, null)
+
+        val etName = dialogView.findViewById<EditText>(R.id.et_name)
+        val etBalance = dialogView.findViewById<EditText>(R.id.et_balance)
+        val etCurrency = dialogView.findViewById<EditText>(R.id.et_currency)
+
+        AlertDialog.Builder(this)
+            .setTitle("Добавить счёт")
+            .setView(dialogView)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val name = etName.text.toString()
+                val balance = etBalance.text.toString().toIntOrNull() ?: 0
+                val currency = etCurrency.text.toString()
+
+                val account = Account(
+                    name = name,
+                    balance = balance,
+                    currency = currency,
+                    isActive = true
+                )
+                presenter.createAccount(account)
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
     }
 }

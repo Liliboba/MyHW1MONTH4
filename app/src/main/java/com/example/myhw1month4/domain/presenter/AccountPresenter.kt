@@ -1,32 +1,47 @@
 package com.example.myhw1month4.domain.presenter
 
 import com.example.myhw1month4.data.model.Account
+import com.example.myhw1month4.data.network.ApiClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class AccountPresenter(val view: AccountContracts.View): AccountContracts.Presenter {
 
     override fun loadAccunts() {
-        val testMockAccount = listOf(
-            Account(
-                id = "1",
-                name = "M bank ",
-                currency = "USD",
-                balance = 1000
-            ),
-            Account(
-                id = "2",
-                name = "Alpha Bank",
-                currency = "KGS",
-                balance = 50000
-            ),
+        ApiClient.accountsApi.fetchAccounts().enqueue(object: Callback<List<Account>>{
+            override fun onResponse(
+                call: Call<List<Account>?>,
+                response: Response<List<Account>?>
+            ) {
+                if (response.isSuccessful)
+                    view.showAccounts(response.body() ?: emptyList())
 
-            Account(
-                id = "3",
-                name = "Unity Bank",
-                currency = "EUR",
-                balance = 200
-            ),
-        )
-        view.showAccounts(testMockAccount)
+            }
+
+            override fun onFailure(
+                call: Call<List<Account>?>,
+                t: Throwable
+            ) {
+
+            }
+
+        })
     }
+
+    override fun createAccount(account: Account) {
+        ApiClient.accountsApi.createAccounts(account)
+            .enqueue(object : Callback<Account> {
+                override fun onResponse(call: Call<Account>, response: Response<Account>) {
+                    if (response.isSuccessful) {
+                        loadAccunts()
+                    }
+                }
+
+                override fun onFailure(call: Call<Account>, t: Throwable) {
+                }
+            })
+    }
+
 
 }
