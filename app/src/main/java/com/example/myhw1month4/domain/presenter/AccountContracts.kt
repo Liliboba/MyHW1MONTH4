@@ -1,6 +1,7 @@
 package com.example.myhw1month4.domain.presenter
 
 import com.example.myhw1month4.data.model.Account
+import com.example.myhw1month4.data.model.AccountState
 
 interface AccountContracts {
 
@@ -9,7 +10,10 @@ interface AccountContracts {
     }
 
     interface Presenter {
-        fun loadAccunts()
+        fun loadAccounts()
         fun createAccount(account: Account)
+        fun updateFullyAccount(account: Account)
+        fun updateStateAccount(accountId: String, accountState: AccountState)
+        fun deleteAccount(accountId: String)
     }
 }

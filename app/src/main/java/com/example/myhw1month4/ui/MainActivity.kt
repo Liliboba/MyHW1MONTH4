@@ -1,16 +1,16 @@
 package com.example.myhw1month4.ui
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.EditText
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myhw1month4.R
 import com.example.myhw1month4.data.model.Account
+import com.example.myhw1month4.data.model.AccountState
 import com.example.myhw1month4.databinding.ActivityMainBinding
+import com.example.myhw1month4.databinding.DialogAddAccountBinding
 import com.example.myhw1month4.domain.presenter.AccountContracts
 import com.example.myhw1month4.domain.presenter.AccountPresenter
 import com.example.myhw1month4.ui.adapter.AccountAdapter
@@ -33,11 +33,46 @@ class MainActivity : AppCompatActivity(), AccountContracts.View {
         binding.btnAdd.setOnClickListener {
             showAddDialog()
         }
+
+
+    }
+    private fun showEditDialog(account: Account){
+        val binding = DialogAddAccountBinding.inflate(LayoutInflater.from(this))
+        with(binding){
+
+            etName.setText(account.name)
+            etBalance.setText(account.balance.toString())
+            etCurrency.setText(account.currency)
+
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("Отредактировать счёт")
+                .setView(binding.root)
+                .setPositiveButton("Изменить") { _, _ ->
+                    val updatedAccount = account.copy(
+                        name = etName.text.toString(),
+                        currency = etCurrency.text.toString(),
+                        balance = etBalance.text.toString().toInt()
+                    )
+                    presenter.updateFullyAccount(updatedAccount)
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
+        }
     }
 
     private fun initAdapter(){
         with(binding){
-            adapter = AccountAdapter()
+            adapter = AccountAdapter(
+                onEdit = {
+                    showEditDialog(it)
+                },
+                onDelete = {
+                    presenter.deleteAccount(it)
+                },
+                onSwitchToggleButton = { id, isChecked ->
+                    presenter.updateStateAccount(id, AccountState(isChecked))
+                }
+            )
             recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
             recyclerView.adapter= adapter
         }
@@ -45,7 +80,7 @@ class MainActivity : AppCompatActivity(), AccountContracts.View {
 
     override fun onResume() {
         super.onResume()
-        presenter.loadAccunts()
+        presenter.loadAccounts()
     }
 
     override fun showAccounts(list: List<Account>) {
@@ -78,4 +113,5 @@ class MainActivity : AppCompatActivity(), AccountContracts.View {
             .setNegativeButton("Отмена", null)
             .show()
     }
+
 }

@@ -1,14 +1,17 @@
 package com.example.myhw1month4.ui.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myhw1month4.R
 import com.example.myhw1month4.data.model.Account
+import com.example.myhw1month4.databinding.ItemAccountBinding
 
-class AccountAdapter: RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
+class AccountAdapter(
+    val onEdit: (Account) -> Unit,
+    val onDelete: (String) -> Unit,
+    val onSwitchToggleButton: (String, Boolean) -> Unit
+): RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
 
     private val items = mutableListOf<Account>()
 
@@ -19,8 +22,8 @@ class AccountAdapter: RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_account, parent, false)
-        return AccountViewHolder(view)
+        val binding = ItemAccountBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return AccountViewHolder(binding)
     }
 
     override fun getItemCount(): Int = items.size
@@ -30,11 +33,25 @@ class AccountAdapter: RecyclerView.Adapter<AccountAdapter.AccountViewHolder>() {
     }
 
 
+    inner class AccountViewHolder(private val binding: ItemAccountBinding): RecyclerView.ViewHolder(binding.root){
+        fun bind(account: Account) = with(binding) {
+            tvName.text = account.name
+            tvBalance.text = "${account.balance} ${account.currency}"
+            btnEdit.setOnClickListener {
+                onEdit(account)
+            }
+            btnDelete.setOnClickListener {
+                account.id?.let {
+                    onDelete(it)
+                }
 
-    inner class AccountViewHolder(view: View): RecyclerView.ViewHolder(view){
-        fun bind(account: Account) = with(itemView) {
-            findViewById<TextView>(R.id.tv_name).text = account.name
-            findViewById<TextView>(R.id.tv_balance).text = "${account.balance} ${account.currency}"
+            }
+            switcher.isChecked = account.isActive == true
+            switcher.setOnCheckedChangeListener { buttonView, isChecked ->
+                account.id?.let {
+                    onSwitchToggleButton(it, isChecked)
+                }
+            }
         }
     }
 }
